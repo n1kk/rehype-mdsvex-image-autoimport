@@ -18,7 +18,10 @@ const text = (lines: string[]) => lines.join("\n");
 describe("mdsvex image autoimport", () => {
     it("should import image as id and replace image path with that id", async () => {
         const result = await compileSource({
-            source: `![Image1](./img1.png)`,
+            source: text([
+                `# Title`, //
+                `![Image1](./img1.png)`,
+            ]),
             filename: "test/index.mdx",
             options: {},
         });
@@ -26,6 +29,7 @@ describe("mdsvex image autoimport", () => {
         expect(result).toBe(
             text([
                 '<script>;import __img_0 from "./img1.png";</script>',
+                "<h1>Title</h1>",
                 '<p><img src="{__img_0}" alt="Image1"></p>',
                 "",
             ]),
