@@ -2,6 +2,8 @@
 
 Rehype plugin for MDSveX to automatically turn your markdown images to local imports.
 
+By default, it imports only images that are not web links (starts with `http(s)`) and if the file exist locally relatively to the document. But you can override resolving logic.
+
 ```ts
 import { compile } from "mdsvex";
 import { rehypeMdsvexImageAutoimport } from "rehype-mdsvex-image-autoimport";
@@ -49,4 +51,20 @@ const preservedImportSearch = await compile(`
 // <script>;import __img_0 from "./img1.png?srcset";</script>
 // <h1>Title</h1>
 // <p><img src="{__img_0}" alt="Image1"></p>
+```
+
+Options signature:
+
+```ts
+type Options = {
+  /** Override generated ids for each import */
+  id?: (index: number) => string;
+  
+  /** Supply your own resolver
+   * string: resolved path to use for import
+   * false: skip this image
+   * void|undefined: use default resolver
+   */
+  resolve?: (imageSrc: string, documentPath: string) => string | false | void;
+};
 ```
