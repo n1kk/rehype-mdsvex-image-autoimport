@@ -30,29 +30,60 @@ const isImgTag = (node: any): node is Script => {
 };
 
 type Options = {
-    checkExistance?: boolean;
+    /** Override generated ids for each import */
     id?: (index: number) => string;
-    resolve?: (imageSrc: string, documentPath: string) => string | void;
+
+    /** Supply your own resolver
+     * string: resolved path to use for import
+     * false: skip this image
+     * void|undefined: use default resolver
+     */
+    resolve?: (imageSrc: string, documentPath: string) => string | false | void;
 };
+
+type Resolver = Required<Options>["resolve"];
 
 const getId = (index: number) => `__img_${index}`;
 
-const resolvePth = (imagePath: string, parentPath: string) => path.resolve(path.dirname(parentPath), imagePath);
+const defaultResolve = (imgSrc: string, parentPath: string): string | undefined => {
+    const [imagePath, searchParams = ""] = parseImagePath(imgSrc);
+    const dirname = path.dirname(parentPath);
+    const imageFullPath = path.resolve(dirname, imagePath);
+    if (!fs.existsSync(imageFullPath)) {
+        return;
+    }
+    const relPath = path.relative(dirname, imageFullPath);
+    const relPrefix = relPath.startsWith("..") ? "" : "./";
+    const importPath = `${relPrefix}${relPath}${searchParams}`;
+    return importPath;
+};
 
 const parseImagePath = (imgPath: string) => {
     const index = imgPath.indexOf("?");
     return index >= 0 ? [imgPath.substring(0, index), imgPath.substring(index)] : [imgPath];
 };
 
+function resolvePath(imgSrc: string, parentPath: string, resolvers: (Resolver | undefined)[]): string | undefined {
+    for (const resolver of resolvers) {
+        if (resolver) {
+            const resolveResult = resolver(imgSrc, parentPath);
+            if (typeof resolveResult === "string") {
+                return resolveResult;
+            } else if (resolveResult === false) {
+                return undefined;
+            }
+        }
+    }
+}
+
 export function rehypeMdsvexImageAutoimport(config?: Options) {
     const makeId = typeof config?.id === "function" ? config?.id : getId;
-    const resolve = typeof config?.resolve === "function" ? config?.resolve : resolvePth;
 
     return (tree: Node, file: any & { filename: string }) => {
         let script: Script | undefined = undefined;
 
         if (!file.filename) {
-            console.warn("[rehypeMdsvexImageAutoimport] Unexpected: file has no filename");
+            console.warn("[rehype-mdsvex-image-autoimport] Unexpected: file has no filename");
             return;
         }
 
@@ -82,7 +113,11 @@ export function rehypeMdsvexImageAutoimport(config?: Options) {
 
         const findImageNodes = () => {
             const nodes: Node[] = [];
-            visit(tree, isImgTag, (node, index, parent) => {
+            visit(tree, isImgTag, (node: any, index, parent) => {
+                const src = node.properties.src;
+                if (src.startsWith("http://") || src.startsWith("https://")) {
+                    return;
+                }
                 nodes.push(node);
             });
             return nodes;
@@ -91,18 +126,10 @@ export function rehypeMdsvexImageAutoimport(config?: Options) {
         const images = findImageNodes();
 
         images.forEach((imgNode: any, index) => {
-            const [imagePath, searchParams = ""] = parseImagePath(imgNode.properties.src);
-            const fullImagePath = resolve(imagePath, file.filename);
-
-            if (fullImagePath) {
-                if (config?.checkExistance && !fs.existsSync(fullImagePath)) {
-                    return;
-                }
-
+            const src = imgNode.properties.src;
+            let importPath = resolvePath(src, file.filename, [config?.resolve, defaultResolve]);
+            if (importPath) {
                 const id = makeId(index);
-                const relPath = path.relative(path.dirname(file.filename), fullImagePath);
-                const relPrefix = relPath.startsWith("..") ? "" : "./";
-                const importPath = `${relPrefix}${relPath}${searchParams}`;
                 addImportToScriptNode(id, importPath);
                 imgNode.properties.src = `{${id}}`;
             }
