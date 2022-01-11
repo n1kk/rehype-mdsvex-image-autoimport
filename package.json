@@ -1,7 +1,7 @@
 {
   "name": "rehype-mdsvex-image-autoimport",
   "version": "1.0.0",
-  "description": "Rehype plugin for MDSveX to automatically turn your relative images to local imports.",
+  "description": "Rehype plugin for MDSveX to automatically turn your markdown images to local imports.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
