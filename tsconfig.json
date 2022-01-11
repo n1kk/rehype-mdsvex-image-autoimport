@@ -9,7 +9,7 @@
     "isolatedModules": true,
     "sourceMap": true,
     "importsNotUsedAsValues": "error",
-    "module": "CommonJS",
+    "module": "esnext",
     "allowJs": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
