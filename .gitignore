@@ -1,6 +1,7 @@
 node_modules
 .idea
 dist
+**/.DS_Store
 index.js
 index.d.ts
 index.js.map
