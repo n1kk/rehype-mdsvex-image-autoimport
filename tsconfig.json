@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["esnext"],
+    "types": ["node", "jest"],
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "importsNotUsedAsValues": "error",
+    "module": "CommonJS",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "incremental": true,
+    "downlevelIteration": true,
+    "declaration": true,
+    "outDir": "dist"
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules"]
+}

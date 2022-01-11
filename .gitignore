@@ -1,0 +1,7 @@
+node_modules
+.idea
+dist
+index.js
+index.d.ts
+index.js.map
+tsconfig.tsbuildinfo
