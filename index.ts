@@ -32,7 +32,7 @@ const isImgTag = (node: any): node is Script => {
 type Options = {
     checkExistance?: boolean;
     id?: (index: number) => string;
-    resolve?: (imagePath: string, parentPath: string) => string | void;
+    resolve?: (imageSrc: string, documentPath: string) => string | void;
 };
 
 const getId = (index: number) => `__img_${index}`;
