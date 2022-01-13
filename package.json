@@ -1,6 +1,6 @@
 {
   "name": "rehype-mdsvex-image-autoimport",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Rehype plugin for MDSveX to automatically turn your markdown images to local imports.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -15,8 +15,6 @@
     "build": "pnpm tsc -b ./tsconfig.json",
     "test": "pnpm jest"
   },
-  "author": "n1kk",
-  "license": "MIT",
   "devDependencies": {
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.8",
@@ -35,5 +33,13 @@
   },
   "peerDependencies": {
     "mdsvex": "^0.9.8"
-  }
+  },
+  "author": "n1kk",
+  "license": "MIT",
+  "keywords": [
+    "rehype",
+    "mdsvex",
+    "image",
+    "autoimport"
+  ]
 }
