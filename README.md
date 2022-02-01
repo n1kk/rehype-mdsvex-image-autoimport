@@ -2,7 +2,7 @@
 
 Rehype plugin for MDSveX to automatically turn your markdown images to local imports.
 
-By default, it imports only images that are not web links (starts with `http(s)`) and if the file exist locally relatively to the document. But you can override resolving logic.
+By default, it imports only images that are not web links (starts with `http(s)`) and if the file exist locally relatively to the document. But you can override resolving logic. Works with [`vite-imagetools`](https://github.com/JonasKruckenberg/imagetools) and frontmatter.
 
 This package is an ES Module.
 
@@ -53,6 +53,19 @@ const preservedImportSearch = await compile(`
 ![Image1](./img1.png?srcset)
 `);
 // <script>;import __img_0 from "./img1.png?srcset";</script>
+// <h1>Title</h1>
+// <p><img src="{__img_0}" alt="Image1"></p>
+
+// supports frontmatter references
+const frontmatterReference = await compile(`
+---
+thumb: ./myImage.png
+---
+# Title
+![Image1]({thumb})
+`);
+// <script context="module"> export const metadata = {"thumb":"./myImage.png"}; const { thumb } = metadata; </script>
+// <script>;import __img_0 from "./myImage.png";</script>
 // <h1>Title</h1>
 // <p><img src="{__img_0}" alt="Image1"></p>
 ```
