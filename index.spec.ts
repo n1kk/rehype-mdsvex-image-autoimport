@@ -1,6 +1,7 @@
 import { rehypeMdsvexImageAutoimport } from "./index";
 import { compile } from "mdsvex";
 import fs from "fs";
+import { $t } from "shift-tab";
 
 type Options = Parameters<typeof rehypeMdsvexImageAutoimport>[0];
 
@@ -14,8 +15,6 @@ async function compileSource(input: { source: string; filename: string; options:
     return result?.code || "";
 }
 
-const text = (lines: string[]) => lines.join("\n");
-
 jest.mock("fs");
 
 describe("mdsvex image autoimport", () => {
@@ -24,68 +23,73 @@ describe("mdsvex image autoimport", () => {
     });
 
     it("should import image", async () => {
+        const source = $t`
+                # Title
+                
+                ![Image1](./img1.png)
+            `;
         const result = await compileSource({
-            source: text([
-                `# Title`, //
-                `![Image1](./img1.png)`,
-            ]),
+            source,
             filename: "test/index.mdx",
             options: {},
         });
 
         expect(result).toBe(
-            text([
-                '<script>;import __img_0 from "./img1.png";</script>',
-                "<h1>Title</h1>",
-                '<p><img src="{__img_0}" alt="Image1"></p>',
-                "",
-            ]),
+            $t`
+                <script>;import __img_0 from "./img1.png";</script>
+                
+                <h1>Title</h1>
+                <p><img src="{__img_0}" alt="Image1"></p>
+                
+            `,
         );
     });
 
     it("should import multiple images", async () => {
         const result = await compileSource({
-            source: text([
-                `# Title`, //
-                `![Image1](./img1.png)`,
-                ``,
-                `![Image2](./img2.png)`,
-            ]),
+            source: $t`
+                # Title
+                ![Image1](./img1.png)
+                
+                ![Image2](./img2.png)
+            `,
             filename: "test/index.mdx",
             options: {},
         });
 
         expect(result).toBe(
-            text([
-                '<script>;import __img_0 from "./img1.png";;import __img_1 from "./img2.png";</script>',
-                "<h1>Title</h1>",
-                '<p><img src="{__img_0}" alt="Image1"></p>',
-                '<p><img src="{__img_1}" alt="Image2"></p>',
-                "",
-            ]),
+            $t`
+                <script>;import __img_0 from "./img1.png";;import __img_1 from "./img2.png";</script>
+                
+                <h1>Title</h1>
+                <p><img src="{__img_0}" alt="Image1"></p>
+                <p><img src="{__img_1}" alt="Image2"></p>
+                
+            `,
         );
     });
 
     it("should skip http images", async () => {
         const result = await compileSource({
-            source: text([
-                `# Title`, //
-                `![Image1](http://somedomain.com/someimage.jpg)`,
-                ``,
-                `![Image2](./img1.png)`,
-            ]),
+            source: $t`
+                # Title
+                ![Image1](http://somedomain.com/someimage.jpg)
+                
+                ![Image2](./img1.png)
+            `,
             filename: "test/index.mdx",
             options: {},
         });
 
         expect(result).toBe(
-            text([
-                '<script>;import __img_0 from "./img1.png";</script>',
-                "<h1>Title</h1>",
-                `<p><img src="http://somedomain.com/someimage.jpg" alt="Image1"></p>`,
-                '<p><img src="{__img_0}" alt="Image2"></p>',
-                "",
-            ]),
+            $t`
+                <script>;import __img_0 from "./img1.png";</script>
+                
+                <h1>Title</h1>
+                <p><img src="http://somedomain.com/someimage.jpg" alt="Image1"></p>
+                <p><img src="{__img_0}" alt="Image2"></p>
+                
+            `,
         );
     });
 
@@ -93,21 +97,21 @@ describe("mdsvex image autoimport", () => {
         (fs.existsSync as ReturnType<typeof jest.fn>).mockReturnValue(false);
 
         const result = await compileSource({
-            source: text([
-                `# Title`, //
-                `![Image2](./img1.png)`,
-            ]),
+            source: $t`
+                # Title
+                ![Image2](./img1.png)
+            `,
             filename: "test/index.mdx",
             options: {},
         });
 
         expect(result).toBe(
-            text([
-                "",
-                "<h1>Title</h1>", //
-                '<p><img src="./img1.png" alt="Image2"></p>',
-                "",
-            ]),
+            $t`
+                
+                <h1>Title</h1>
+                <p><img src="./img1.png" alt="Image2"></p>
+                
+            `,
         );
     });
 
@@ -119,7 +123,12 @@ describe("mdsvex image autoimport", () => {
         });
 
         expect(result).toBe(
-            text(['<script>;import __id0 from "./img1.png";</script>', '<p><img src="{__id0}" alt="Image1"></p>', ""]),
+            $t`
+                <script>;import __id0 from "./img1.png";</script>
+                
+                <p><img src="{__id0}" alt="Image1"></p>
+                
+            `,
         );
     });
 
@@ -131,23 +140,24 @@ describe("mdsvex image autoimport", () => {
         });
 
         expect(result).toBe(
-            text([
-                '<script>;import __img_0 from "./images/img1.png";</script>',
-                '<p><img src="{__img_0}" alt="Image1"></p>',
-                "",
-            ]),
+            $t`
+                <script>;import __img_0 from "./images/img1.png";</script>
+                
+                <p><img src="{__img_0}" alt="Image1"></p>
+                
+            `,
         );
     });
 
     it("should only call resolve on local images", async () => {
         const spy = jest.fn((imagePath, parentPath) => `./images/img1.png`);
         const result = await compileSource({
-            source: text([
-                `# Title`, //
-                `![Image1](http://somedomain.com/someimage.jpg)`,
-                ``,
-                `![Image2](./img1.png)`,
-            ]),
+            source: $t`
+                # Title
+                ![Image1](http://somedomain.com/someimage.jpg)
+                
+                ![Image2](./img1.png)
+            `,
             filename: "test/index.mdx",
             options: { resolve: spy },
         });
@@ -157,44 +167,46 @@ describe("mdsvex image autoimport", () => {
 
     it("should inject into existing script", async () => {
         const result = await compileSource({
-            source: text([
-                `<script>import a from "b";</script>`, //
-                `![Image1](./img1.png)`,
-            ]),
+            source: $t`
+                <script>import a from "b";</script>
+                
+                ![Image1](./img1.png)
+            `,
             filename: "test/index.mdx",
             options: {},
         });
 
         expect(result).toBe(
-            text([
-                '<script>import a from "b";;import __img_0 from "./img1.png";</script>',
-                "",
-                "",
-                '<p><img src="{__img_0}" alt="Image1"></p>',
-                "",
-            ]),
+            $t`
+                <script>import a from "b";;import __img_0 from "./img1.png";</script>
+                
+                
+                <p><img src="{__img_0}" alt="Image1"></p>
+                
+            `,
         );
     });
 
     it("should not inject into module script", async () => {
         const result = await compileSource({
-            source: text([
-                `<script context="module">export let flag = 1;</script>`, //
-                `![Image1](./img1.png)`,
-            ]),
+            source: $t`
+                <script context="module">export let flag = 1;</script>
+                
+                ![Image1](./img1.png)
+            `,
             filename: "test/index.mdx",
             options: {},
         });
 
         expect(result).toBe(
-            text([
-                '<script>;import __img_0 from "./img1.png";</script>' +
-                    '<script context="module">export let flag = 1;</script>',
-                "",
-                "",
-                '<p><img src="{__img_0}" alt="Image1"></p>',
-                "",
-            ]),
+            $t`
+                <script>;import __img_0 from "./img1.png";</script>
+                <script context="module">export let flag = 1;</script>
+                
+                
+                <p><img src="{__img_0}" alt="Image1"></p>
+                
+            `,
         );
     });
 
@@ -207,11 +219,12 @@ describe("mdsvex image autoimport", () => {
             });
 
             expect(result).toBe(
-                text([
-                    '<script>;import __img_0 from "./img1.png?srcset";</script>',
-                    '<p><img src="{__img_0}" alt="Image1"></p>',
-                    "",
-                ]),
+                $t`
+                    <script>;import __img_0 from "./img1.png?srcset";</script>
+                    
+                    <p><img src="{__img_0}" alt="Image1"></p>
+                    
+                `,
             );
         });
 
@@ -223,11 +236,12 @@ describe("mdsvex image autoimport", () => {
             });
 
             expect(result).toBe(
-                text([
-                    '<script>;import __img_0 from "./images/img1.png?srcset";</script>',
-                    '<p><img src="{__img_0}" alt="Image1"></p>',
-                    "",
-                ]),
+                $t`
+                    <script>;import __img_0 from "./images/img1.png?srcset";</script>
+                    
+                    <p><img src="{__img_0}" alt="Image1"></p>
+                    
+                `,
             );
         });
     });
