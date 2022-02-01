@@ -2,20 +2,26 @@ import path from "path";
 import fs from "fs";
 import { visit } from "unist-util-visit";
 import type { Literal, Node, Parent } from "unist";
-import type { VFile } from "vfile";
 
 type Script = Literal<string>;
 
-const isNonModuleScript = (node: any): node is Script => {
+const isScript = (node: any): node is Script => {
     return (
         node &&
         typeof node === "object" &&
         node.type === "raw" &&
         typeof node.value === "string" &&
         node.value.startsWith("<script") &&
-        node.value.endsWith("</script>") &&
-        !node.value.includes(`context="module"`)
+        node.value.endsWith("</script>")
     );
+};
+
+const isNonModuleScript = (node: any): node is Script => {
+    return isScript(node) && !node.value.includes(`context="module"`);
+};
+
+const isModuleScript = (node: any): node is Script => {
+    return isScript(node) && node.value.includes(`context="module"`);
 };
 
 const isImgTag = (node: any): node is Script => {
@@ -33,7 +39,7 @@ type Options = {
     /** Override generated ids for each import */
     id?: (index: number) => string;
 
-    /** Supply your own resolver
+    /** Supply your own resolver that returns
      * string: resolved path to use for import
      * false: skip this image
      * void|undefined: use default resolver
@@ -81,6 +87,7 @@ export function rehypeMdsvexImageAutoimport(config?: Options) {
 
     return (tree: Node, file: any & { filename: string }) => {
         let script: Script | undefined = undefined;
+        let moduleScript: Script | undefined = undefined;
 
         if (!file.filename) {
             console.warn("[rehype-mdsvex-image-autoimport] Unexpected: file has no filename");
@@ -89,6 +96,10 @@ export function rehypeMdsvexImageAutoimport(config?: Options) {
 
         visit(tree, isNonModuleScript, (node, index, parent) => {
             script = node;
+        });
+
+        visit(tree, isModuleScript, (node, index, parent) => {
+            moduleScript = node;
         });
 
         const getScriptNode = () => {
@@ -101,7 +112,10 @@ export function rehypeMdsvexImageAutoimport(config?: Options) {
                 if (!t.children) {
                     t.children = [];
                 }
-                t.children.unshift(script);
+                t.children.unshift(script, {
+                    type: "raw",
+                    value: "\n",
+                } as Node);
             }
             return script;
         };
@@ -124,10 +138,19 @@ export function rehypeMdsvexImageAutoimport(config?: Options) {
         };
 
         const images = findImageNodes();
-
         images.forEach((imgNode: any, index) => {
-            const src = imgNode.properties.src;
-            let importPath = resolvePath(src, file.filename, [config?.resolve, defaultResolve]);
+            const src: string = imgNode.properties.src;
+            let filePath: string;
+
+            if (/{\w+}/.test(src) && moduleScript) {
+                const id = src.slice(1, -1);
+                const match = moduleScript.value.match(RegExp(`"${id}":"(.*?)"`));
+                filePath = match?.[1] || src;
+            } else {
+                filePath = src;
+            }
+
+            let importPath = resolvePath(filePath, file.filename, [config?.resolve, defaultResolve]);
             if (importPath) {
                 const id = makeId(index);
                 addImportToScriptNode(id, importPath);
