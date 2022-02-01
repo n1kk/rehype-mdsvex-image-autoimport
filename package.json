@@ -7,6 +7,7 @@
   "repository": "github:n1kk/rehype-mdsvex-image-autoimport",
   "homepage": "https://github.com/n1kk/rehype-mdsvex-image-autoimport",
   "type": "module",
+  "sideEffects": "false",
   "files": [
     "dist/index.js",
     "dist/index.d.ts"
@@ -22,6 +23,7 @@
     "mdsvex": "^0.9.8",
     "prettier": "^2.5.1",
     "rehype": "^12.0.0",
+    "shift-tab": "^3.0.0",
     "svelte": "^3.45.0",
     "ts-jest": "^27.1.2",
     "typescript": "4.4",
@@ -29,7 +31,8 @@
     "vfile": "^5.2.1"
   },
   "dependencies": {
-    "unist-util-visit": "^4.1.0"
+    "unist-util-visit": "^4.1.0",
+    "urijs": "^1.19.7"
   },
   "peerDependencies": {
     "mdsvex": "^0.9.8"

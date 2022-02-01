@@ -7,15 +7,18 @@ specifiers:
   mdsvex: ^0.9.8
   prettier: ^2.5.1
   rehype: ^12.0.0
+  shift-tab: ^3.0.0
   svelte: ^3.45.0
   ts-jest: ^27.1.2
   typescript: '4.4'
   unified: ^10.1.1
   unist-util-visit: ^4.1.0
+  urijs: ^1.19.7
   vfile: ^5.2.1
 
 dependencies:
   unist-util-visit: 4.1.0
+  urijs: 1.19.7
 
 devDependencies:
   '@types/jest': 27.4.0
@@ -24,6 +27,7 @@ devDependencies:
   mdsvex: 0.9.8_svelte@3.45.0
   prettier: 2.5.1
   rehype: 12.0.0
+  shift-tab: 3.0.0
   svelte: 3.45.0
   ts-jest: 27.1.2_66384c16d2d04e63ecb486a305451023
   typescript: 4.4.4
@@ -2433,6 +2437,10 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /shift-tab/3.0.0:
+    resolution: {integrity: sha512-wrwALMqDEDP95d8BjDIfuAxgks1b/KtHm1QcpkWjUeW2wXwjIJtz8m19tbL2CyZPQTFkkTu1ld/D0VDWfx3/3g==}
+    dev: true
+
   /signal-exit/3.0.6:
     resolution: {integrity: sha512-sDl4qMFpijcGw22U5w63KmD3cZJfBuFlVNbVMKje2keoKML7X2UzWbc4XrmEbDwg0NXJc3yv4/ox7b+JWb57kQ==}
     dev: true
@@ -2733,6 +2741,10 @@ packages:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
     dev: true
+
+  /urijs/1.19.7:
+    resolution: {integrity: sha512-Id+IKjdU0Hx+7Zx717jwLPsPeUqz7rAtuVBRLLs+qn+J2nf9NGITWVCxcijgYxBqe83C7sqsQPs6H1pyz3x9gA==}
+    dev: false
 
   /v8-to-istanbul/8.1.1:
     resolution: {integrity: sha512-FGtKtv3xIpR6BYhvgH8MI/y78oT7d8Au3ww4QIxymrCtZEh5b8gCw2siywE+puhEmuWKDtmfrvF5UlB298ut3w==}
