@@ -210,6 +210,27 @@ describe("mdsvex image autoimport", () => {
         );
     });
 
+    it("should inject into script even when using theme", async () => {
+        const source = `![Image1](./img1.png)`;
+        
+        const result = await compile(source, {
+            filename: "test/index.mdx",
+            extensions: ["mdx"],
+            rehypePlugins: [[rehypeMdsvexImageAutoimport, {}]],
+            layout: "./test-layout.svelte",
+        });
+
+        expect(result?.code).toBe(
+            $t`
+                <script>import a from "b";;import __img_0 from "./img1.png";</script>
+                
+                
+                <p><img src="{__img_0}" alt="Image1"></p>
+                
+            `,
+        );
+    });
+
     describe("search params", () => {
         it("should preserve search params in import queries for vite", async () => {
             const result = await compileSource({
